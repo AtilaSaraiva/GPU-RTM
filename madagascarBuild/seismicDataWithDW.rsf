@@ -1,0 +1,14 @@
+3.1-git	mod	LSRTM_GPU_proj/RTM/madagascarBuild:	asqs@marreca	Wed Nov 18 12:36:19 2020
+
+	d2=25
+	n2=368
+	o1=0
+	d3=10
+	n3=36
+	o2=0
+	data_format="native_float"
+	o3=0
+	esize=4
+	in="/var/tmp/LSRTM_GPU_proj/RTM/madagascarBuild/seismicDataWithDW.rsf@"
+	d1=0.000727273
+	n1=4125

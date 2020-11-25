@@ -19,12 +19,10 @@ mod: main.cu cuwaveprop2d.cu cudaKernels.cu
 
 run: mod
 	./mod rtm=$(dFold)/$(rtm) vel=$(dFold)/$(vel) shots=$(shots)
+	sfgrey <$(dFold)/$(rtm) >rtm.vpl
 	#sfimage <$(dFold)/$(data)
 	#sfgrey <$(dFold)/$(data) | sfpen &
-	#ximage n1=920 <snap/snap_u3_s0_1290_920_1120
-	#ximage n1=780 <test_kernel_add_sourceArray &
-	#ximage n1=780 <snap/snap_u3_s0_0_780_980 &
-	#ximage n1=780 <snap/snap_u3_s1_0_780_980 &
+	#ximage n1=645 < snap/upgoing_u3_s0_1600_645_588
 
 profile: mod
 	nvprof ./mod nr=400 nshots=2 incShots=100 isrc=0 jsrc=200 gxbeg=0 vel=$(dFold)/$(vel) data=$(dFold)/$(data) OD=$(dFold)/$(OD) comOD=$(dFold)/$(comOD)

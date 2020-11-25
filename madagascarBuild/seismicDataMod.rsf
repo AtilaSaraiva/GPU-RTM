@@ -1,4 +1,4 @@
-3.1-git	mod	LSRTM_GPU_proj/RTM/madagascarBuild:	asqs@marreca	Mon Nov 23 13:01:35 2020
+3.1-git	mod	LSRTM_GPU_proj/RTM/madagascarBuild:	asqs@marreca	Mon Nov 23 13:27:23 2020
 
 	d2=25
 	n2=368
@@ -10,7 +10,7 @@
 	o3=0
 	esize=4
 	gxbeg=0
-	in="/var/tmp/LSRTM_GPU_proj/RTM/madagascarBuild/seismicData.rsf@"
+	in="/var/tmp/LSRTM_GPU_proj/RTM/madagascarBuild/seismicDataMod.rsf@"
 	incRec=0
 	sxbeg=1
 	incShots=5

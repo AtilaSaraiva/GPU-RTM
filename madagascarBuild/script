@@ -1,4 +1,8 @@
 rm --force snap/*
+cd ../../FD-Seismic-data
+rm mod
+make
+cd -
 rm seismicData.rsf
 cd ..
 rm mod

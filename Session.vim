@@ -7,15 +7,17 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 main.cu
+badd +271 main.cu
 badd +1 cuwaveprop2d.cu
 badd +1 cudaKernels.cu
 badd +1 Makefile
+badd +8 ~/Códigos/rtm-CUDA/src/lapfilter.c
+badd +1 ~/Dropbox/Projetos/mestrado/Códigos/LSRTM_GPU_proj/FD-Seismic-data/testData/vel.rsf
 argglobal
 %argdel
 $argadd main.cu
 set stal=2
-edit main.cu
+edit cuwaveprop2d.cu
 set splitbelow splitright
 wincmd t
 set winminheight=0
@@ -32,35 +34,35 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 289 - ((10 * winheight(0) + 20) / 40)
+let s:l = 273 - ((10 * winheight(0) + 17) / 35)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-289
+273
+normal! 031|
+tabedit main.cu
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 86 - ((21 * winheight(0) + 17) / 35)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+86
 normal! 0
-tabedit cuwaveprop2d.cu
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-argglobal
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let s:l = 214 - ((21 * winheight(0) + 20) / 40)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-214
-normal! 049|
 tabedit cudaKernels.cu
 set splitbelow splitright
 wincmd t
@@ -78,11 +80,11 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 19) / 38)
+let s:l = 135 - ((25 * winheight(0) + 17) / 35)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+135
 normal! 0
 tabedit Makefile
 set splitbelow splitright
@@ -101,13 +103,13 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 12 - ((10 * winheight(0) + 19) / 38)
+let s:l = 13 - ((12 * winheight(0) + 17) / 35)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-12
-normal! 024|
-tabnext 2
+13
+normal! 011|
+tabnext 4
 set stal=1
 if exists('s:wipebuf') && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf

@@ -31,6 +31,7 @@ typedef struct{
     int nReceptors;
     int lastReceptorPos;
     int incShots;
+    int incRec;
     int modelNx;
     int modelNy;
     int modelNxBorder;
@@ -93,7 +94,7 @@ void expand(int nb, int nyb, int nxb, int nz, int nx, float *a, float *b)
 void abc_coef (int nb, float *abc)
 {
     for(int i=0; i<nb; i++){
-        abc[i] = exp (-pow(0.0008 * (nb - i + 1),2.0));
+        abc[i] = exp (-pow(0.002 * (nb - i + 1),2.0));
     }
 }
 
@@ -141,6 +142,7 @@ geometry getParameters(sf_file FvelModel, sf_file Fshots)
     sf_histint(Fshots,"gxbeg",&param.firstReceptorPos);
     sf_histint(Fshots,"n3",&param.nShots);
     sf_histint(Fshots,"incShots",&param.incShots);
+    sf_histint(Fshots,"incRec",&param.incRec);
     sf_histint(FvelModel, "n1",&param.modelNy);
     sf_histint(FvelModel, "n2", &param.modelNx);
     sf_histfloat(FvelModel, "d1",&param.modelDy);
@@ -176,10 +178,10 @@ velocity getVelFields(sf_file FvelModel, geometry param)
     h_model.firstLayerVelField = new float[param.nbxy];
     dummyVelField(param.modelNxBorder, param.modelNyBorder, param.taperBorder, h_model.extVelField, h_model.firstLayerVelField);
 
-    printf("MODEL:\n");
-    printf("\t%i x %i\t:param.modelNy x param.modelNx\n", param.modelNy, param.modelNx);
-    printf("\t%f\t:param.modelDx\n", param.modelDx);
-    printf("\t%f\t:h_model.velField[0]\n", h_model.velField[0]);
+    //printf("MODEL:\n");
+    //printf("\t%i x %i\t:param.modelNy x param.modelNx\n", param.modelNy, param.modelNx);
+    //printf("\t%f\t:param.modelDx\n", param.modelDx);
+    //printf("\t%f\t:h_model.velField[0]\n", h_model.velField[0]);
     return h_model;
 }
 
@@ -201,8 +203,8 @@ seismicData allocHostSeisData(geometry param, sf_file Fshots)
     seismicData h_seisData;
     sf_histfloat(Fshots,"d1",&h_seisData.timeStep);
     sf_histint(Fshots,"n1",&h_seisData.timeSamplesNt);
-    h_seisData.seismogram = new float[param.nReceptors * h_seisData.timeSamplesNt];
-    sf_floatread(h_seisData.seismogram, param.nReceptors * h_seisData.timeSamplesNt, Fshots);
+    h_seisData.seismogram = new float[param.nShots * param.nReceptors * h_seisData.timeSamplesNt];
+    sf_floatread(h_seisData.seismogram, param.nShots * param.nReceptors * h_seisData.timeSamplesNt, Fshots);
     return h_seisData;
 }
 
@@ -229,14 +231,15 @@ float* fillSrc(geometry param, velocity h_model, seismicData h_seisData)
         wavelet[it] *= dt2dx2;
     }
     delete[] time;
-    printf("TIME STEPPING:\n");
-    printf("\t%e\t:h_seisData.timeStep\n", h_seisData.timeStep);
-    printf("\t%i\t:h_seisData.timeSamplesNt\n", h_seisData.timeSamplesNt);
+    //printf("TIME STEPPING:\n");
+    //printf("\t%e\t:h_seisData.timeStep\n", h_seisData.timeStep);
+    //printf("\t%i\t:h_seisData.timeSamplesNt\n", h_seisData.timeSamplesNt);
     return wavelet;
 }
 
 void test_getParameters (geometry param, seismicData h_seisData)
 {
+    cerr<<"param.incShots: "<<param.incShots<<endl;
     cerr<<"param.incShots: "<<param.incShots<<endl;
     cerr<<"param.modelDims nx = "<<param.modelNx<<" ny = "<<param.modelNy<<endl;
     cerr<<"param.modelDx = "<<param.modelDx<<" param.modelDy = "<<param.modelDy<<endl;
@@ -286,11 +289,6 @@ int main(int argc, char *argv[])
     // Time stepping
     float* h_wavelet = fillSrc(param, h_model, h_seisData);
 
-    FILE *wavelet = fopen("wavelet.bin", "w");
-
-    fwrite(h_wavelet, sizeof(float), h_seisData.timeSamplesNt, wavelet);
-
-
     // Set Output files
     int dimensions[3] = {param.modelNy,param.modelNx,1};
     float spacings[3] = {1,1,1};
@@ -303,13 +301,13 @@ int main(int argc, char *argv[])
     rtm(param, h_model, h_wavelet, h_tapermask, h_seisData, Fdata);
     // =================================================
 
-    printf("Clean memory...");
+    //printf("Clean memory...");
     delete[] h_model.velField;
     delete[] h_model.extVelField;
     delete[] h_model.firstLayerVelField;
     delete[] h_seisData.seismogram;
     delete[] h_tapermask;
 
-
+    sf_close();
     return 0;
 }

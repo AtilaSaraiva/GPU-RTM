@@ -25,6 +25,34 @@ __global__ void kernel_add_wavelet(float *d_u, float *d_wavelet, int it, int jsr
     }
 }
 
+// Add a whole shot gather
+__global__ void kernel_add_seismicdata(int it, int nr, int gxbeg, float *d_u1, float *d_seisdata)
+{
+    unsigned int gx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if(gx < nr){
+        d_u1[(gx + gxbeg + c_nb) * c_ny + c_nb] += d_seisdata[gx * c_nt + it];
+    }
+}
+
+__global__ void kernel_image_condition(float *d_u, float *d_q, float *d_rtm)
+{
+    /*
+    d_u             :pointer to an array on device where to add source term
+    d_wavelet       :pointer to an array on device with source signature
+    it              :time step id
+    */
+    unsigned int gx = blockIdx.x * blockDim.x + threadIdx.x;
+    unsigned int gy = blockIdx.y * blockDim.y + threadIdx.y;
+    unsigned int idx = gx * c_ny + gy;
+
+    if (gy < c_ny && gx < c_nx)
+    {
+        d_rtm[idx] += d_u[idx] * d_q[idx];
+    }
+}
+
+
 __global__ void kernel_add_sourceArray(float *d_u, float *d_sourceArray)
 {
     /*
@@ -145,6 +173,7 @@ __device__ void set_halo(float *global, float shared[][SDIMX], int tx, int ty, i
     }
 }
 
+
 // FD kernel
 __global__ void kernel_2dfd(float *d_u1, float *d_u2, float *d_vp)
 {
@@ -153,7 +182,9 @@ __global__ void kernel_2dfd(float *d_u1, float *d_u2, float *d_vp)
     const int ny = c_ny;
 
     // FD coefficient dt2 / dx2
-    const float dt2dx2 = c_dt2dx2;
+    const float dt2 = c_dt2;
+    const float one_dx2 = c_one_dx2;
+    const float one_dy2 = c_one_dy2;
 
     // Thread address (ty, tx) in a block
     const unsigned int tx = threadIdx.x;
@@ -196,7 +227,62 @@ __global__ void kernel_2dfd(float *d_u1, float *d_u2, float *d_vp)
             du2_yy += c_coef[d] * (s_u2[sy - d][sx] + s_u2[sy + d][sx]);
         }
         // Second order wave equation
-        d_u1[idx] = 2.0 * s_u2[sy][sx] - s_u1[sy][sx] + s_vp[sy][sx] * s_vp[sy][sx] * (du2_xx + du2_yy) * dt2dx2;
+        d_u1[idx] = 2.0 * s_u2[sy][sx] - s_u1[sy][sx] + s_vp[sy][sx] * s_vp[sy][sx] * (du2_xx * one_dx2 + du2_yy * one_dy2) * dt2;
+        //d_u1[idx] = du2_xx;
+
+        __syncthreads();
+    }
+}
+
+// Lapla filter kernel
+__global__ void kernel_lap_filter(float *d_rtm)
+{
+    // save model dims in registers as they are much faster
+    const int nx = c_nx;
+    const int ny = c_ny;
+
+    // FD coefficient dt2 / dx2
+    const float one_dx2 = c_one_dx2;
+    const float one_dy2 = c_one_dy2;
+
+    // Thread address (ty, tx) in a block
+    const unsigned int tx = threadIdx.x;
+    const unsigned int ty = threadIdx.y;
+
+    // Thread address (sy, sx) in shared memory
+    const unsigned int sx = threadIdx.x + HALO;
+    const unsigned int sy = threadIdx.y + HALO;
+
+    // Thread address (gy, gx) in global memory
+    const unsigned int gx = blockIdx.x * blockDim.x + tx;
+    const unsigned int gy = blockIdx.y * blockDim.y + ty;
+
+    // Global linear index
+    const unsigned int idx = gx * ny + gy;
+
+    // Allocate shared memory for a block (smem)
+    __shared__ float s_rtm[SDIMY][SDIMX];
+
+    // If thread points into the physical domain
+    if ((gx < nx) && (gy < ny))
+    {
+        // Copy regions from gmem into smem
+        //       gmem, smem,  block, shared, global, dims
+        set_halo(d_rtm, s_rtm, tx, ty, sx, sy, gx, gy, nx, ny);
+        __syncthreads();
+
+        // Central point of fd stencil, o o o o x o o o o
+        float drtm_xx = c_coef[0] * s_rtm[sy][sx];
+        float drtm_yy = c_coef[0] * s_rtm[sy][sx];
+
+#pragma unroll
+        for (int d = 1; d <= 4; d++)
+        {
+            drtm_xx += c_coef[d] * (s_rtm[sy][sx - d] + s_rtm[sy][sx + d]);
+            drtm_yy += c_coef[d] * (s_rtm[sy - d][sx] + s_rtm[sy + d][sx]);
+        }
+        // Second order wave equation
+        d_rtm[idx] = drtm_xx * one_dx2 + drtm_yy * one_dy2;
 
         __syncthreads();
     }
