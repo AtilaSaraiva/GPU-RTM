@@ -34,20 +34,27 @@ from rsf.proj import *
 Flow('marmref','marmvel','deriv')
 Result('marmref','grey')
 
-Flow('seismicData','marmvel marmref','../../Born/mod incShots=5 incRec=0 nshots=73 nr=368 isrc=0 jsrc=1 gxbeg=0 ref=${SOURCES[1]} vel=${SOURCES[0]} data=${TARGETS[0]} ',stdout=0)
+Flow('seismicData','marmvel marmref',
+"""../../Born/mod incShots=1 incRec=0 nshots=300 nr=368 isrc=0 jsrc=34 gxbeg=0 ref=${SOURCES[1]} vel=${SOURCES[0]} data=${TARGETS[0]} """,stdout=0)
+
+Result('seismicData', "grey gainpanel=a")
 
 Flow('rtm','marmvel seismicData','../mod shots=${SOURCES[1]} vel=${SOURCES[0]} rtm=${TARGETS[0]} ',stdout=0)
 
 Result('rtm', "grey gainpanel=a")
 
 Flow('rtmlap','rtm',"laplace")
+
 Result('rtmlap', "grey gainpanel=a")
 
-Flow('seismicDataMod','marmvel rtmlap','../../Born/mod incShots=5 incRec=0 nshots=73 nr=368 isrc=0 jsrc=1 gxbeg=0 ref=${SOURCES[1]} vel=${SOURCES[0]} data=${TARGETS[0]} ',stdout=0)
+Flow('seismicDataMod','marmvel rtmlap',
+"""../../Born/mod incShots=1 incRec=0 nshots=300 nr=368 isrc=0 jsrc=34 gxbeg=0 ref=${SOURCES[1]} vel=${SOURCES[0]} data=${TARGETS[0]} """,stdout=0)
 Result('seismicDataMod', "grey gainpanel=a")
 
 Flow('rtmMigMod','marmvel seismicDataMod','../mod shots=${SOURCES[1]} vel=${SOURCES[0]} rtm=${TARGETS[0]} ',stdout=0)
 
 Flow('rtmMigModlap','rtmMigMod',"laplace")
+
+Result('rtmMigMod', "grey gainpanel=a")
 Result('rtmMigModlap', "grey gainpanel=a")
 End()

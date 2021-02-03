@@ -9,4 +9,4 @@ label2=Offset
 title="Marmousi velocity (m/s)"
 data_format="native_float"
 esize=4
-in="../../marmo-vel"
+in="../../../marmo-vel"
