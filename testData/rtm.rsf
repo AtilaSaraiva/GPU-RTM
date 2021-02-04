@@ -1,4 +1,4 @@
-3.1-git	mod	LSRTM_GPU_proj/projects/RTM:	asqs@marreca	Wed Dec  2 18:48:41 2020
+3.1-git	mod	LSRTM_GPU_proj/projects/RTM:	asqs@marreca	Thu Feb  4 06:07:26 2021
 
 	d2=1
 	n2=368
@@ -9,6 +9,6 @@
 	data_format="native_float"
 	o3=0
 	esize=4
-	in="/home/asqs/tmp/modcqbOch"
+	in="/home/asqs/tmp/mod97AhoU"
 	d1=1
 	n1=425

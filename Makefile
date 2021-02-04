@@ -21,7 +21,7 @@ DEPS = $(wildcard $(IDIR)/*.cuh)
 
 CFLAGS = -I$(IDIR) -arch=sm_30
 
-PROG = mod
+PROG = rtm
 
 dFold=testData
 shots=../FD-Seismic-data/testData/seismicData.rsf
@@ -37,14 +37,14 @@ main.o: main.cu $(DEPS)
 $(ODIR)/%.o: $(ODIR)/%.cu $(DEPS)
 	nvcc -x cu $(CFLAGS) $(LDFLAGS) -o $@ -dc $<
 
-run: mod
-	./mod rtm=$(dFold)/$(rtm) vel=$(dFold)/$(vel) shots=$(shots)
+run: $(PROG)
+	./$(PROG) rtm=$(dFold)/$(rtm) vel=$(dFold)/$(vel) shots=$(shots)
 	sfgrey <$(dFold)/$(rtm) >rtm.vpl
 	#sfimage <$(dFold)/$(data)
 	#sfgrey <$(dFold)/$(data) | sfpen &
 	#ximage n1=645 < snap/upgoing_u3_s0_1600_645_588
 
-profile: mod
+profile: $(PROG)
 	nvprof ./mod nr=400 nshots=2 incShots=100 isrc=0 jsrc=200 gxbeg=0 vel=$(dFold)/$(vel) data=$(dFold)/$(data) OD=$(dFold)/$(OD) comOD=$(dFold)/$(comOD)
 
 PHONY: clean
