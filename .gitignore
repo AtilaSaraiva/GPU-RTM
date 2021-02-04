@@ -10,3 +10,4 @@ tmp*
 *.o
 cuwaveprop2D
 simple2DFD*
+madagascarBuild/Fig/*
